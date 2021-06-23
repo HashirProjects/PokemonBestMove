@@ -12,7 +12,6 @@ class Pokemon():
 		#get column 2 and 3 for the corresponding name to get classes, and 5, 6, 7, and 8 for attack and def
 		pokeDB = pd.read_csv("PokemonTypes.txt", delimiter = ",")
 		DFforName = pokeDB[pokeDB.Name == self.name]
-		print(DFforName)
 
 		for i in range(2,4):
 			self.classes.append(DFforName.iat[0,i])
@@ -48,9 +47,6 @@ def FindMostEffectiveMove(moves,friendlyName,enemyName):
 
 	print(enemyPokemon.CheckMoves(moves,friendlyPokemon.stats,friendlyPokemon.classes))
 
-pokemon=Pokemon("Ivysaur")
-pokemon.FetchClass()
-print(pokemon.classes, pokemon.stats)
 
 
 
