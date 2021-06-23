@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class Pokemon():
 
@@ -22,10 +23,24 @@ class Pokemon():
 class EnemyPokemon(Pokemon):
 
 	def FindWeakness(self):
-		pass
 		#load weaknessDB in
 		#look in weaknessDB where classes match and fetch the corresponding arrays
 		#have an array of ones (one of each class) and multiply it by the arrays found in the DB
+		weaknessDB = pd.read_csv("Weaknesses.txt", delimiter = ",")
+		weaknessArray = np.array([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
+
+		for type in self.classes:
+			DFforType = weaknessDB[weaknessDB.Type == type]
+
+			multiplier = []
+			for i in range(1,19):
+				multiplier.append(DFforType.iat[0,i])
+
+			multiplier = np.array(multiplier)
+			weaknessArray = weaknessArray * multiplier
+
+		self.weaknessArray = weaknessArray
+		print (self.weaknessArray)
 
 	def CheckMoves(self,moves,friendlyStats,friendlyClasses):
 		pass
@@ -47,7 +62,9 @@ def FindMostEffectiveMove(moves,friendlyName,enemyName):
 
 	print(enemyPokemon.CheckMoves(moves,friendlyPokemon.stats,friendlyPokemon.classes))
 
-
+pokemon=EnemyPokemon("Ivysaur")
+pokemon.FetchClass()
+pokemon.FindWeakness()
 
 
 
