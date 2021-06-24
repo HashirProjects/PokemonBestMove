@@ -12,13 +12,14 @@ class Pokemon():
 		#load pokeDB in
 		#get column 2 and 3 for the corresponding name to get classes, and 5, 6, 7, and 8 for attack and def
 		pokeDB = pd.read_csv("PokemonTypes.txt", delimiter = ",")
-		DFforName = pokeDB[pokeDB.Name == self.name]
+		pokeDB.set_index("Name", inplace = True)
+		DFforName = pokeDB.loc[self.name]
+		print(DFforName)
 
-		for i in range(2,4):
-			self.classes.append(DFforName.iat[0,i])
-		
-		for i in range(4,8):
-			self.stats.append(DFforName.iat[0,i])
+		self.classes=DFforName[0:2]
+		self.stats=DFforName[4:8]
+
+		print(self.classes,self.stats)
 
 class EnemyPokemon(Pokemon):
 
@@ -27,27 +28,37 @@ class EnemyPokemon(Pokemon):
 		#look in weaknessDB where classes match and fetch the corresponding arrays
 		#have an array of ones (one of each class) and multiply it by the arrays found in the DB
 		weaknessDB = pd.read_csv("Weaknesses.txt", delimiter = ",")
-		weaknessArray = np.array([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
+		weaknessDB.set_index("Type", inplace=True)
+		weaknessArray = pd.Series(np.array([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]),index= ["Normal","Fire","Water","Electric","Grass","Ice","Fighting","Poison","Ground","Flying","Psychic","Bug","Rock","Ghost","Dragon","Dark","Steel","Fairy"])
+
 
 		for type in self.classes:
-			DFforType = weaknessDB[weaknessDB.Type == type]
-
-			multiplier = []
-			for i in range(1,19):
-				multiplier.append(DFforType.iat[0,i])
-
-			multiplier = np.array(multiplier)
-			weaknessArray = weaknessArray * multiplier
+			DFforType = weaknessDB[type]
+			weaknessArray = weaknessArray * DFforType
 
 		self.weaknessArray = weaknessArray
-		print (self.weaknessArray)
+		print(self.weaknessArray)
 
 	def CheckMoves(self,moves,friendlyStats,friendlyClasses):
-		pass
 		#load MovesDB in
 		#find the type of each move and the power and weather it is special
 		#calculate the effectiveness using the array in findWeakness and multiply by (the power of the move * Att of friendly/ Def of enemy (or special if it is a special move)) 
 		#return the move that will do the most damage
+		movesDB = pd.read_csv("PokemonMoves.txt", delimiter = ",")
+		movesDB.set_index("Name", inplace=True)
+		
+		def getEffectiveness(power,friendlyAtt,enemyDef,weaknessArray,type):
+			typeMulti = weaknessArray[type]
+
+
+		for move in moves:
+			DFforMove = movesDB[move]
+
+			if DFforMove.at[0,"Special"]:
+				pass
+			else:
+				pass
+			
 
 
 
