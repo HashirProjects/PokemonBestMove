@@ -34,6 +34,7 @@ class EnemyPokemon(Pokemon):
 			weaknessArray = weaknessArray * DFforType
 
 		self.weaknessArray = weaknessArray
+		print(f"The type based weaknesses for the enemy pokemon are:\n{self.weaknessArray}")
 
 	def CheckMoves(self,moves,friendlyStats,friendlyClasses):
 		#load MovesDB in
@@ -43,9 +44,13 @@ class EnemyPokemon(Pokemon):
 		movesDB = pd.read_csv("PokemonMovesFormatted.txt", delimiter = ",")
 		movesDB.set_index("Name", inplace=True)
 		
-		def getEffectiveness(power,friendlyAtt,enemyDef,weaknessArray,type,accuracy):
+		def getEffectiveness(power,friendlyAtt,enemyDef,weaknessArray,type,accuracy,friendlyClasses):
 			typeMulti = weaknessArray[type]
 			effectiveness = int(power) * int(typeMulti) * int(accuracy) * (friendlyAtt/enemyDef)
+			for pokeClass in friendlyClasses:
+				if type == pokeClass:
+					effectiveness = effectiveness * 1.5
+					break
 			return effectiveness
 
 		movesPower=[]
@@ -63,10 +68,10 @@ class EnemyPokemon(Pokemon):
 				friendlyAtt = friendlyStats["Attack"]
 				enemyDef = self.stats["Defense"]
 			
-			movesPower.append(getEffectiveness(power,friendlyAtt,enemyDef,self.weaknessArray,movetype,accuracy))
+			movesPower.append(getEffectiveness(power,friendlyAtt,enemyDef,self.weaknessArray,movetype,accuracy,friendlyClasses))
 
 		self.movesPower = pd.Series(movesPower, index = moves)
-		print(f"the relative effectiveness of the moves you entered depending on the enemy pokemon are as follows:\n{self.movesPower}")
+		print(f"The relative effectivenesses of the moves you entered depending on the stats of the pokemon involved are as follows:\n{self.movesPower/max(self.movesPower)}")
 
 
 
