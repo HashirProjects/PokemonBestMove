@@ -14,12 +14,9 @@ class Pokemon():
 		pokeDB = pd.read_csv("PokemonTypes.txt", delimiter = ",")
 		pokeDB.set_index("Name", inplace = True)
 		DFforName = pokeDB.loc[self.name]
-		print(DFforName)
 
 		self.classes=DFforName[0:2]
 		self.stats=DFforName[4:8]
-
-		print(self.classes,self.stats)
 
 class EnemyPokemon(Pokemon):
 
@@ -33,32 +30,43 @@ class EnemyPokemon(Pokemon):
 
 
 		for type in self.classes:
-			DFforType = weaknessDB[type]
+			DFforType = weaknessDB.loc[type]
 			weaknessArray = weaknessArray * DFforType
 
 		self.weaknessArray = weaknessArray
-		print(self.weaknessArray)
 
 	def CheckMoves(self,moves,friendlyStats,friendlyClasses):
 		#load MovesDB in
 		#find the type of each move and the power and weather it is special
 		#calculate the effectiveness using the array in findWeakness and multiply by (the power of the move * Att of friendly/ Def of enemy (or special if it is a special move)) 
 		#return the move that will do the most damage
-		movesDB = pd.read_csv("PokemonMoves.txt", delimiter = ",")
+		movesDB = pd.read_csv("PokemonMovesFormatted.txt", delimiter = ",")
 		movesDB.set_index("Name", inplace=True)
 		
-		def getEffectiveness(power,friendlyAtt,enemyDef,weaknessArray,type):
+		def getEffectiveness(power,friendlyAtt,enemyDef,weaknessArray,type,accuracy):
 			typeMulti = weaknessArray[type]
+			effectiveness = int(power) * int(typeMulti) * int(accuracy) * (friendlyAtt/enemyDef)
+			return effectiveness
 
+		movesPower=[]
 
 		for move in moves:
-			DFforMove = movesDB[move]
+			DFforMove = movesDB.loc[move]
+			power = DFforMove["Power"]
+			accuracy = DFforMove["Accuracy"]
+			movetype = DFforMove["Type"]
 
-			if DFforMove.at[0,"Special"]:
-				pass
+			if DFforMove["Special"]:
+				friendlyAtt = friendlyStats["Sp. Atk"]
+				enemyDef = self.stats["Sp. Def"]
 			else:
-				pass
+				friendlyAtt = friendlyStats["Attack"]
+				enemyDef = self.stats["Defense"]
 			
+			movesPower.append(getEffectiveness(power,friendlyAtt,enemyDef,self.weaknessArray,movetype,accuracy))
+
+		self.movesPower = pd.Series(movesPower, index = moves)
+		print(f"the relative effectiveness of the moves you entered depending on the enemy pokemon are as follows:\n{self.movesPower}")
 
 
 
@@ -71,11 +79,9 @@ def FindMostEffectiveMove(moves,friendlyName,enemyName):
 	friendlyPokemon= Pokemon(friendlyName)
 	friendlyPokemon.FetchClass()
 
-	print(enemyPokemon.CheckMoves(moves,friendlyPokemon.stats,friendlyPokemon.classes))
+	enemyPokemon.CheckMoves(moves,friendlyPokemon.stats,friendlyPokemon.classes)
 
-pokemon=EnemyPokemon("Ivysaur")
-pokemon.FetchClass()
-pokemon.FindWeakness()
+FindMostEffectiveMove(["Pound","Mega Punch","Leech Seed"],"Ivysaur","Bulbasaur")
 
 
 
